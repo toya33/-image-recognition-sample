@@ -73,7 +73,20 @@ def ocr(image):
     res = tool.image_to_string(
         image,
         lang="jpn",
-        builder=pyocr.builders.LineBoxBuilder(),
+        builder=pyocr.builders.LineBoxBuilder(tesseract_layout=6)
+    )
+    return res
+
+def ocr2(image):
+    tools = pyocr.get_available_tools()
+    if len(tools) == 0:
+        print("No OCR tool found")
+        sys.exit(1)
+    tool = tools[0]
+    res = tool.image_to_string(
+        image,
+        lang="eng",
+        builder=pyocr.builders.LineBoxBuilder(tesseract_layout=6)
     )
     return res
 
@@ -90,11 +103,36 @@ def app_click(application):
                     y=rect[1]+word_box.position[0][1]
                 )
 
+def app_click2(application):
+    ss = screenshot(application)
+    img = image_processing(ss)
+    img.show()
+    line_boxs = ocr2(img)
+    '''
+    if len(line_boxs) > 0:
+        rect = win32gui.GetWindowRect(application)
+        for num in range(20,0,-1):
+            for line_box in line_boxs:
+                for word_box in line_box.word_boxes:
+                    if word_box.content == num:              
+                        pgui.click(
+                            x=rect[0]+word_box.position[0][0],
+                            y=rect[1]+word_box.position[0][1]
+                        )
+                break
+    '''
+    for line_box in line_boxs:
+        print(line_box.content)
+
+
+
 def main():
     #アプリケーションを最前面に表示
     app = foreground()
     #クリック
-    app_click(app)
+    #app_click(app)
+
+    app_click2(app)
 
 if __name__ == "__main__":
     main()
